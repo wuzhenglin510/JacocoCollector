@@ -1,0 +1,10 @@
+system:
+  maven-settings-path: "/Users/leo/tool/maven/conf/settings.xml"
+  exec-data-dir: "/Users/leo/projects/coverage/jacoco-collector/data/exec"
+  xml-data-dir: "/Users/leo/projects/coverage/jacoco-collector/data/xml"
+  git-dir: "/Users/leo/jacoco_storage"
+  git-account: "your git account"
+  git-password: "your git password"
+
+server:
+  port: 7070
