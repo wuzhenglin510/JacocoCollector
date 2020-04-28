@@ -19,6 +19,6 @@
 3. 测试人员通过点击 UI 界面进行测试
 4. 在 SonarQube 上可以看到 测试分支 在 生产分支下引入的新代码的测试覆盖率
 
-![JacocoCollector/21588068145_.pic_hd.jpg](readme/21588068145_.pic_hd.jpg)
+![readme/21588068145_.pic_hd.jpg](readme/21588068145_.pic_hd.jpg)
 
-![JacocoCollector/41588068147_.pic_hd.jpg](readme/41588068147_.pic_hd.jpg)
+![readme/41588068147_.pic_hd.jpg](readme/41588068147_.pic_hd.jpg)
