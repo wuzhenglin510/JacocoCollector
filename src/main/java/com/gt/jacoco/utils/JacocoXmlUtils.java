@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -500,25 +497,45 @@ public class JacocoXmlUtils {
     }
 
     private static void setAllMethodEndLine(Document xml) {
-        List<Node> nodes = xml.selectNodes("//method");
-        for (int idx = 0; idx < nodes.size(); idx++) {
-            Node node = nodes.get(idx);
-            Element methodElement = (Element) node;
-            int startLine = Integer.parseInt(methodElement.attributeValue("line"));
-            if (idx < nodes.size() - 1) {
-                Node nextNode = nodes.get(idx + 1);
-                if (nextNode.getParent().attributeValue("sourcefilename").equals(node.getParent().attributeValue("sourcefilename"))) {
-                    Element nextMethodElement = (Element) nextNode;
-                    methodElement.addAttribute("endLine", String.valueOf(Integer.parseInt(nextMethodElement.attributeValue("line")) - 1));
+        List<Node> allNodes = xml.selectNodes("//method");
+        Map<String, List<Node>> groupByFileName = new HashMap<>();
+        for (Node node : allNodes) {
+            String fileName = node.getParent().attributeValue("sourcefilename");
+            if (!groupByFileName.containsKey(fileName)) {
+                groupByFileName.put(fileName, new ArrayList<>());
+            }
+            groupByFileName.get(fileName).add(node);
+        }
+        for (String fileName : groupByFileName.keySet()) {
+            List<Node> nodes = groupByFileName.get(fileName);
+            Collections.sort(nodes, (o1, o2) -> {
+                Element method1 = (Element) o1;
+                Element method2 = (Element) o2;
+                if (Integer.parseInt(method1.attributeValue("line")) < Integer.parseInt(method2.attributeValue("line"))) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+            for (int idx = 0; idx < nodes.size(); idx++) {
+                Node node = nodes.get(idx);
+                Element methodElement = (Element) node;
+                int startLine = Integer.parseInt(methodElement.attributeValue("line"));
+                if (idx < nodes.size() - 1) {
+                    Node nextNode = nodes.get(idx + 1);
+                    if (nextNode.getParent().attributeValue("sourcefilename").equals(node.getParent().attributeValue("sourcefilename"))) {
+                        Element nextMethodElement = (Element) nextNode;
+                        methodElement.addAttribute("endLine", String.valueOf(Integer.parseInt(nextMethodElement.attributeValue("line")) - 1));
+                    } else {
+                        Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
+                        int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
+                        methodElement.addAttribute("endLine", String.valueOf(startLine + lines + 100));
+                    }
                 } else {
                     Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
                     int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
                     methodElement.addAttribute("endLine", String.valueOf(startLine + lines + 100));
                 }
-            } else {
-                Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
-                int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
-                methodElement.addAttribute("endLine", String.valueOf(startLine + lines + 100));
             }
         }
     }
