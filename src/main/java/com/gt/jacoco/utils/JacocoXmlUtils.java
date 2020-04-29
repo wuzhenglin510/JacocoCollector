@@ -30,6 +30,7 @@ public class JacocoXmlUtils {
         processForPackage(document, classMethodChanged);
         setAllMethodEndLine(document);
         processForUnchangedLine(document);
+        recountCoverage(document);
     }
 
     /**
@@ -341,6 +342,7 @@ public class JacocoXmlUtils {
                 List<Node> classNodes = node.selectNodes("class");
                 for (Node classNode : classNodes) {
                     setUnchangedNode100CoverageStepInMethodRecursive(classNode);
+                    ((Element) classNode).addAttribute("mark", "unchanged");
                 }
                 break;
             }
@@ -348,6 +350,7 @@ public class JacocoXmlUtils {
                 List<Node> methodNodes = node.selectNodes("method");
                 for (Node methodNode : methodNodes) {
                     setUnchangedNode100CoverageStepInMethodRecursive(methodNode);
+                    ((Element) methodNode).addAttribute("mark", "unchanged");
                 }
                 break;
             }
@@ -475,7 +478,7 @@ public class JacocoXmlUtils {
             int lineOffset = findLineIndex(startLine, lines);
             Element line = (Element) lines.get(lineOffset);
 
-            while (startLine <= endLine && lineOffset < lines.size() - 1) {
+            while (startLine <= endLine && lineOffset < lines.size()) {
                 int mi = Integer.parseInt(line.attributeValue("mi"));
                 int ci = Integer.parseInt(line.attributeValue("ci"));
                 int mb = Integer.parseInt(line.attributeValue("mb"));
@@ -486,6 +489,9 @@ public class JacocoXmlUtils {
                 line.attribute("cb").setValue(String.valueOf(mb + cb));
                 line.addAttribute("mark", "unchanged");
                 lineOffset++;
+                if (lineOffset >= lines.size()) {
+                    break;
+                }
                 line = (Element) lines.get(lineOffset);
                 startLine = Integer.parseInt(line.attributeValue("nr"));
             }
@@ -495,14 +501,24 @@ public class JacocoXmlUtils {
 
     private static void setAllMethodEndLine(Document xml) {
         List<Node> nodes = xml.selectNodes("//method");
-        for (Node node : nodes) {
+        for (int idx = 0; idx < nodes.size(); idx++) {
+            Node node = nodes.get(idx);
             Element methodElement = (Element) node;
-            Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
-            if (reportLineCountNode != null) {
-                int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
-                methodElement.addAttribute("endLine", String.valueOf(Integer.parseInt(methodElement.attributeValue("line")) + lines + 1));
+            int startLine = Integer.parseInt(methodElement.attributeValue("line"));
+            if (idx < nodes.size() - 1) {
+                Node nextNode = nodes.get(idx + 1);
+                if (nextNode.getParent().attributeValue("sourcefilename").equals(node.getParent().attributeValue("sourcefilename"))) {
+                    Element nextMethodElement = (Element) nextNode;
+                    methodElement.addAttribute("endLine", String.valueOf(Integer.parseInt(nextMethodElement.attributeValue("line")) - 1));
+                } else {
+                    Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
+                    int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
+                    methodElement.addAttribute("endLine", String.valueOf(startLine + lines + 100));
+                }
             } else {
-                methodElement.addAttribute("endLine", methodElement.attributeValue("line"));
+                Element reportLineCountNode = (Element) node.selectSingleNode("counter[@type='LINE']");
+                int lines = Integer.parseInt(reportLineCountNode.attributeValue("missed")) + Integer.parseInt(reportLineCountNode.attributeValue("covered"));
+                methodElement.addAttribute("endLine", String.valueOf(startLine + lines + 100));
             }
         }
     }

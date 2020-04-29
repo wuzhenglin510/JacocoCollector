@@ -9,6 +9,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -157,6 +158,14 @@ public class ASTUtils {
                 if (methodDeclarationInNew.getBody().isPresent() ^ methodDeclarationInOld.getBody().isPresent()) {
                     methodChangeList.add(new MethodReference(functionName, functionDefinitionInNewClass.get(functionName), methodBodyHash(functionDefinitionInNewClass.get(functionName))));
                 } else if (methodDeclarationInNew.getBody().isPresent() & methodDeclarationInOld.getBody().isPresent()) {
+                    List<Comment> newComments = methodDeclarationInNew.getBody().get().getAllContainedComments();
+                    for (Comment comment : newComments) {
+                        comment.remove();
+                    }
+                    List<Comment> oldComments = methodDeclarationInNew.getBody().get().getAllContainedComments();
+                    for (Comment comment : oldComments) {
+                        comment.remove();
+                    }
                     String newBody = methodDeclarationInNew.getBody().get().toString().replaceAll("\r|\n|\\s", "");
                     String oldBody = methodDeclarationInOld.getBody().get().toString().replaceAll("\r|\n|\\s", "");
                     if (!newBody.equals(oldBody)) {

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.gt.jacoco.utils.JacocoXmlUtils.recountCoverage;
+
 @EnableScheduling
 @Component
 @Slf4j
@@ -70,6 +72,7 @@ public class CoverageWorker {
                 if (oldFile.exists()) {
                     Document oldXml = JacocoXmlUtils.loadFile(oldFilePath);
                     JacocoXmlUtils.merge(oldXml, document);
+                    recountCoverage(document);
                 }
                 try (FileWriter fileWriter = new FileWriter(newXmlFile)) {
                     XMLWriter writer = new XMLWriter(fileWriter);
