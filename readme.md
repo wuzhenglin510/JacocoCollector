@@ -112,5 +112,3 @@ java -javaagent:/Users/leo/tool/jacoco-0.8.5/lib/jacocoagent.jar=output=tcpserve
 ![readme/Untitled%2016.png](readme/Untitled%2016.png)
 
 11、至此完成测试
-
-![readme/Untitled%2017.png](readme/Untitled%2017.png)
