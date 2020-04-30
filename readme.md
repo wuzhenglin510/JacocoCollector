@@ -2,13 +2,19 @@
 
 增量覆盖率Jacoco收集器
 
+### 系统架构
+
+---
+
+![JacocoCollector/Untitled.png](JacocoCollector/Untitled.png)
+
 ### 实现功能
 
 ---
 
 1. 增量代码检查
 2. 历史覆盖率合并
-3. 以函数body为单元判定新增状态，函数调整位置会导致它被判为新增代码
+3. 以函数body为单元判定新增状态，函数调整位置、增加注释、格式化代码都不会导致它被判为新增代码
 
 ### 食用步骤
 
@@ -93,4 +99,18 @@ java -javaagent:/Users/leo/tool/jacoco-0.8.5/lib/jacocoagent.jar=output=tcpserve
 
 ---
 
-10、整体的功能测试就是这样。
+10、我们现在模拟测试人员点击 UI 或自动化接口测试，对后端发起请求。等JacocoCollector定时轮训处理这个项目的时候， 就会将下面跑过的代码进行标注。
+
+![readme/Untitled%2013.png](readme/Untitled%2013.png)
+
+![readme/Untitled%2014.png](readme/Untitled%2014.png)
+
+继续请求get_book接口
+
+![readme/Untitled%2015.png](readme/Untitled%2015.png)
+
+![readme/Untitled%2016.png](readme/Untitled%2016.png)
+
+11、至此完成测试
+
+![readme/Untitled%2017.png](readme/Untitled%2017.png)
